@@ -51,8 +51,7 @@ const filterFood = function(food) {
 
 // End point for users to send image
 app.post('/recognize', upload, (req, res, next) => {
-  // const file = req.file.path
-  const file = './src/tmp/uploads/apple.png'
+  const file = req.file.path
 
   // Handle request and returns text on image
   client
