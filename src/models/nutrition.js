@@ -13,6 +13,17 @@ const NutritionSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  choles: {
+    type: Number
+  },
+  sodium: {
+    type: Number,
+    required: true
+  },
+  potass: {
+    type: Number,
+    required: true
+  },
   carbs: {
     type: Number,
     required: true
@@ -22,9 +33,6 @@ const NutritionSchema = new mongoose.Schema({
     required: true
   },
   sugar: {
-    type: Number
-  },
-  sodium: {
     type: Number
   }
 })
