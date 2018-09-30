@@ -1,6 +1,7 @@
 const { Router } = require('express')
 const bodyParser = require('body-parser')
 const {
+  getAll,
   getByName,
   createNutrition,
   deleteItem
@@ -14,6 +15,8 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false })
 // ROUTES
 const router = new Router()
 
+router.get('/nutrition/getall', getAll)
+
 /**
  * Path: '/nutrition/get'
  * GET all items
@@ -25,7 +28,7 @@ router.post('/nutrition/get', jsonParser, getByName)
 
 /**
  * Path: '/nutrition/new'
- * POST a nenw nutrition
+ * POST a new nutrition
  * @param req
  * @param res
  * @returns Creates new nutrition
