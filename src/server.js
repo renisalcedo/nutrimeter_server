@@ -1,12 +1,12 @@
 require('dotenv').config()
 const mongoose = require('mongoose')
-const fs = require('fs')
 const vision = require('@google-cloud/vision')
 const client = new vision.ImageAnnotatorClient()
-const { resolve, parse } = require('path')
+const { resolve } = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 const multer = require('multer')
+const axios = require('axios')
 
 // Sets temporary storage point
 const upload = multer({
@@ -34,20 +34,45 @@ app.use(bodyParser.json({ limit: '50mb' }))
 
 // End point for users to send image
 app.post('/recognize', upload, (req, res, next) => {
-  const file = req.file.path
+  // const file = req.file.path
+  const file = './src/tmp/uploads/apple.png'
 
   // Handle request and returns text on image
   client
-    .documentTextDetection(file, { languageHints: 'en' })
+    .webDetection(file)
     .then(results => {
-      const labels = results[0].fullTextAnnotation.text
+      // ENSURE NAME WILL ONLY BE FOOD NAME IN DATABASE
+      const name = filterFood(results[0].webDetection.bestGuessLabels[0].label)
 
-      console.log(labels)
-      res.status(200).send(labels)
+      if (name === -1) {
+        return res.status(400).send(-1)
+      }
+      console.log(name)
+
+      // MAKES THE CALL FOR GETTING THE NUTRITION
+      axios
+        .post('https://15e7bd6c.ngrok.io/nutrition/get', { name })
+        .then(foodData => res.status(200).send(foodData.data))
+        .catch(err => res.status(400).json(undefined))
     })
-    .catch(err => {
-      res.status(400).send(err)
-    })
+    .catch(err => res.status(400).send(err))
 })
+
+// FILTER FOOD BASED ON DATABASE FOOD
+function filterFood(food) {
+  food = food.split(' ')
+
+  axios
+    .get('https://15e7bd6c.ngrok.io/nutrition/getall')
+    .then(all => {
+      for (let i = 0; i < food.length; i++) {
+        if (all.data.includes(food[i])) {
+          return food[i]
+        }
+      }
+      return -1
+    })
+    .catch(err => err)
+}
 
 module.exports = app
